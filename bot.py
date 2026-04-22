@@ -48,11 +48,11 @@ GREETING = {
 COUNTRY_SELECT = {
     "text": "У якой краіне ты зараз?",
     "buttons": [
-        [("\U0001f1f5\U0001f1f1 Польшча", "country_pl")],
-        [("\U0001f1f1\U0001f1f9 Літва", "country_lt")],
-        [("\U0001f30d Іншыя краіны", "country_other")],
-        [("\U0001f1e7\U0001f1fe Беларусь — планую заставацца", "country_by_stay")],
-        [("\U0001f1e7\U0001f1fe Беларусь — планую з'язджаць", "country_by_leave")],
+        [("PL Польшча", "country_pl")],
+        [("LT Літва", "country_lt")],
+        [("EU Іншыя краіны", "country_other")],
+        [("BY Беларусь — планую заставацца", "country_by_stay")],
+        [("BY Беларусь — планую з'язджаць", "country_by_leave")],
         [("\U0001f198 Патрэбна дапамога прама зараз", "emergency")],
     ]
 }
