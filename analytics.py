@@ -54,7 +54,7 @@ def log_click(user_id: int, user_data: dict, section_key: str, section_name: str
             "yes" if user_data.get("is_first_after_welcome") else "",
             section_key,
             section_name,
-        ])
+        ], table_range="A1")
         logger.info(f"log_click: запісана ✅ {section_key}")
     except Exception as e:
         logger.warning(f"log_click памылка: {e}")
