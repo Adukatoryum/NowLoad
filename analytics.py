@@ -40,7 +40,9 @@ def log_click(user_id: int, user_data: dict, section_key: str, section_name: str
         if not client:
             return
         spreadsheet_id = os.getenv("SPREADSHEET_ID", "")
+        logger.info(f"log_click: адкрываю sheet '{SHEET_CLICKS}'")
         sheet = client.open_by_key(spreadsheet_id).worksheet(SHEET_CLICKS)
+        logger.info(f"log_click: sheet знойдзены, запісваю '{section_key}'")
         sheet.append_row([
             datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             str(user_id),
@@ -53,6 +55,7 @@ def log_click(user_id: int, user_data: dict, section_key: str, section_name: str
             section_key,
             section_name,
         ])
+        logger.info(f"log_click: запісана ✅ {section_key}")
     except Exception as e:
         logger.warning(f"log_click памылка: {e}")
 
