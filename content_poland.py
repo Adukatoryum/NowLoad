@@ -1465,7 +1465,7 @@ MESSAGES = {
         "wait_text": True
     },
     "feedback_good_earn": {
-        "text": "Дзякуй! NowLoad. Усё наладзіцца 🙏",
+        "text": "Дзякуй! NowLoad. Усё на(ў)ладзіцца 🙏",
         "buttons": [[("🏠 Галоўнае меню", "welcome")]]
     },
     "feedback_bad_earn": {
@@ -1501,7 +1501,7 @@ MESSAGES = {
         "wait_text": True
     },
     "feedback_good_firstmoney": {
-        "text": "Дзякуй! NowLoad. Усё наладзіцца 🙏",
+        "text": "Дзякуй! NowLoad. Усё на(ў)ладзіцца 🙏",
         "buttons": [[("🏠 Галоўнае меню", "welcome")]]
     },
     "feedback_bad_firstmoney": {

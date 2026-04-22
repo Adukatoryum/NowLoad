@@ -37,7 +37,7 @@ GREETING = {
         "\u041f\u0440\u044b\u0432\u0456\u0442\u0430\u043d\u043d\u0435! \U0001f44b \u042f NowLoad.\n\n"
         "\u0414\u0430\u043f\u0430\u043c\u0430\u0436\u0443 \u0440\u0430\u0437\u0430\u0431\u0440\u0430\u0446\u0446\u0430 \u0437 \u0433\u0440\u0430\u0448\u044b\u043c\u0430, \u043f\u0440\u0430\u0446\u0430\u0439 \u0456 \u043f\u0440\u0430\u0432\u0430\u043c\u0456.\n\n"
         "\u041f\u0430\u0441\u043f\u0440\u0430\u0431\u0443\u0435\u043c?\n\n"
-        "<i>NowLoad. \u0423\u0441\u0451 \u043d\u0430\u043b\u0430\u0434\u0437\u0456\u0446\u0446\u0430.</i>"
+        "<i>NowLoad. Усё на(ў)ладзіцца.</i>"
     ),
     "buttons": [
         [("Паспрабуем! \u2192", "country_select")],
@@ -296,7 +296,7 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         "Дзякуй! Твой водгук дапаможа нам зрабіць бот лепшым \U0001f64f\n\n"
-        "NowLoad. Усё наладзіцца.",
+        "NowLoad. Усё на(ў)ладзіцца.",
         reply_markup=build_keyboard([
             [("\U0001f3e0 Галоўнае меню", "welcome")],
         ])
