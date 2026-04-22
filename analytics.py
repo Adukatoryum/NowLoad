@@ -18,11 +18,10 @@ def _get_client():
             logger.warning("GOOGLE_CREDS не ўсталяваны")
             return None
         creds_json_clean = creds_json.strip().strip('"').strip("'")
-# Калі Railway перадаў з сапраўднымі \n унутры радкоў JSON
-        if '\n' in creds_json_clean and 'BEGIN PRIVATE KEY' in creds_json_clean:
-    # Замяняем сапраўдныя пераносы ўнутры значэнняў на \n
+        creds_json_clean = creds_json_clean.replace('\r\n', '\\n').replace('\r', '\\n')
+        if '\n' in creds_json_clean:
             import re
-            creds_json_clean = re.sub(r'(?<=[^\\])\n', '\\n', creds_json_clean)
+            creds_json_clean = re.sub(r'\n', r'\\n', creds_json_clean)
         creds_dict = json.loads(creds_json_clean)
         logger.info(f"project_id: {creds_dict.get('project_id')}, email: {creds_dict.get('client_email')}")
         scopes = [
