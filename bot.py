@@ -6,6 +6,8 @@ NowLoad — Telegram-бот для беларускіх падлеткаў і м
 
 import logging
 import os
+import uuid
+from datetime import datetime
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler,
@@ -190,9 +192,21 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     country = context.user_data.get("country")
     last_section = context.user_data.get("last_section")
 
+    # Лагіруем тупік старой сесіі перад скідам
+    welcome_key_prev = COUNTRY_WELCOME.get(country, "welcome") if country else None
+    if country and last_section and last_section not in ("greeting", "country_select", welcome_key_prev, None):
+        log_click(user_id, context.user_data, "dead_end", f"тупік: {get_section_name(last_section)}")
+
+    # Новая сесія
+    context.user_data["session_id"] = str(uuid.uuid4())[:8]
+    context.user_data["step"] = 0
+    context.user_data["last_click_time"] = None
+    context.user_data["time_on_prev_sec"] = ""
+    context.user_data["is_first_after_welcome"] = False
+
     if not country:
         await send_greeting(update, context)
-        log_click(user_id, "greeting", get_section_name("greeting"))
+        log_click(user_id, context.user_data, "greeting", get_section_name("greeting"))
         return
 
     welcome_key = COUNTRY_WELCOME.get(country, "welcome")
@@ -208,10 +222,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [("\U0001f30d Змяніць краіну", "change_country")],
             ])
         )
-        log_click(user_id, "start_return", get_section_name(last_section))
+        log_click(user_id, context.user_data, "start_return", get_section_name(last_section))
     else:
         await send_message(update, "welcome", context)
-        log_click(user_id, welcome_key, get_section_name(welcome_key))
+        log_click(user_id, context.user_data, welcome_key, get_section_name(welcome_key))
 
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -222,7 +236,24 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from_key = context.user_data.get("last_section", "unknown")
     to_key = query.data
     context.user_data["prev_section"] = from_key
-    log_click(user_id, to_key, get_section_name(to_key))
+
+    # Час на папярэднім раздзеле
+    now = datetime.now()
+    last_time_str = context.user_data.get("last_click_time")
+    if last_time_str:
+        delta = now - datetime.fromisoformat(last_time_str)
+        context.user_data["time_on_prev_sec"] = int(delta.total_seconds())
+    else:
+        context.user_data["time_on_prev_sec"] = ""
+    context.user_data["last_click_time"] = now.isoformat()
+
+    # Глыбіня сцэнара
+    context.user_data["step"] = context.user_data.get("step", 0) + 1
+
+    # Першы раздзел пасля welcome
+    context.user_data["is_first_after_welcome"] = (from_key == "welcome")
+
+    log_click(user_id, context.user_data, to_key, get_section_name(to_key))
 
     if to_key == "country_select":
         await send_country_select(update, context)
@@ -298,8 +329,10 @@ async def test_scenario(
 ):
     context.user_data.clear()
     context.user_data["country"] = country
+    context.user_data["session_id"] = "test_" + str(uuid.uuid4())[:6]
+    context.user_data["step"] = 0
     await send_message(update, key, context)
-    log_click(update.effective_user.id, key, get_section_name(key))
+    log_click(update.effective_user.id, context.user_data, key, get_section_name(key))
 
 
 async def test_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):

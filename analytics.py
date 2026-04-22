@@ -34,17 +34,22 @@ def _get_client():
         return None
 
 
-def log_click(user_id: int, section_key: str, section_name: str):
+def log_click(user_id: int, user_data: dict, section_key: str, section_name: str):
     try:
         client = _get_client()
         if not client:
             return
         spreadsheet_id = os.getenv("SPREADSHEET_ID", "")
-        logger.info(f"SPREADSHEET_ID: '{spreadsheet_id}' len={len(spreadsheet_id)}")
         sheet = client.open_by_key(spreadsheet_id).worksheet(SHEET_CLICKS)
         sheet.append_row([
             datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             str(user_id),
+            user_data.get("session_id", ""),
+            user_data.get("country", ""),
+            user_data.get("age", ""),
+            str(user_data.get("step", "")),
+            str(user_data.get("time_on_prev_sec", "")),
+            "yes" if user_data.get("is_first_after_welcome") else "",
             section_key,
             section_name,
         ])
@@ -79,7 +84,7 @@ def setup_headers():
         spreadsheet_id = os.getenv("SPREADSHEET_ID", "")
         spreadsheet = client.open_by_key(spreadsheet_id)
         clicks = spreadsheet.worksheet(SHEET_CLICKS)
-        clicks.update("A1:D1", [["timestamp", "user_id", "section_key", "section_name"]])
+        clicks.update("A1:J1", [["timestamp", "user_id", "session_id", "country", "age", "step", "time_on_prev_sec", "first_after_welcome", "section_key", "section_name"]])
         feedback = spreadsheet.worksheet(SHEET_FEEDBACK)
         feedback.update("A1:E1", [["timestamp", "user_id", "section_key", "rating", "text"]])
         print("Загалоўкі дададзены")
