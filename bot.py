@@ -72,7 +72,7 @@ AGE_SELECT = {
     ]
 }
 
-# Маршруты па ўзросту для раздзелаў якія раней пыталі ўзрост самастойна
+# Маршруты па ўзросту — толькі для раздзелаў з узроставымі падраздзеламі ў v2.0
 AGE_ROUTE = {
     "earn_start": {
         "under_15": "earn_under15",
@@ -80,20 +80,11 @@ AGE_ROUTE = {
         "18_plus":  "earn_18plus",
     },
     "can_i_work": {
-        "under_15": "can_work_under15",
-        "15_17":    "can_work_15_17",
-        "18_plus":  "can_work_18plus",
+        "under_15": "can_i_work_under15",
+        "15_17":    "can_i_work_15_17",
+        "18_plus":  "can_i_work_18plus",
     },
-    "career_skills": {
-        "under_15": "career_under15",
-        "15_17":    "career_15_17",
-        "18_plus":  "career_18_25",
-    },
-    "open_account": {
-        "under_15": "account_under18",
-        "15_17":    "account_under18",
-        "18_plus":  "account_18plus",
-    },
+    # career_skills і open_account у v2.0 не маюць узроставых падраздзелаў
 }
 
 
@@ -127,24 +118,63 @@ def get_message(key: str, user_data: dict = None) -> dict | None:
 
 def get_section_name(key: str) -> str:
     names = {
-        "greeting":       "Прывітанне",
-        "country_select": "Выбар краіны",
-        "age_select":     "Выбар узросту",
-        "welcome":        "Галоўнае меню",
-        "lt_welcome":     "Галоўнае меню (LT)",
-        "emergency":      "SOS",
-        "not_paid":       "Не заплацілі",
-        "scam_check":     "Скам-чэк",
-        "can_i_work":     "Ці магу працаваць",
-        "documents":      "Дакументы",
-        "earn_start":     "Хачу зарабіць",
-        "earn_offline":   "Афлайн-праца",
-        "earn_online":    "Анлайн-заробак",
-        "career_skills":  "Стажыроўка / навыкі",
-        "open_account":   "Рахунак у банку",
-        "first_money":    "Першыя грошы",
-        "send_money":     "Грошы дадому",
-        "just_arrived":   "Толькі прыехаў",
+        "greeting":                  "Прывітанне",
+        "country_select":            "Выбар краіны",
+        "age_select":                "Выбар узросту",
+        "welcome":                   "Галоўнае меню",
+        "lt_welcome":                "Галоўнае меню (LT)",
+        "emergency":                 "SOS",
+        "emergency_not_paid":        "SOS: Не заплацілі",
+        "emergency_scam":            "SOS: Скам",
+        "emergency_docs":            "SOS: Дакументы",
+        "emergency_other":           "SOS: Іншае",
+        "emergency_language":        "SOS: Мова",
+        "not_paid":                  "Не заплацілі",
+        "not_paid_salary":           "Не заплацілі зарплату",
+        "not_paid_fired":            "Выгналі",
+        "not_paid_nodocs":           "Без дагавора",
+        "scam_check":                "Скам-чэк",
+        "scam_info":                 "Скам: інфа",
+        "scam_easy_money":           "Скам: лёгкія грошы",
+        "scam_signs_work":           "Скам: прыкметы",
+        "scam_checklist_info":       "Скам: чэкліст",
+        "scam_game":                 "Скам: гульня",
+        "can_i_work":                "Ці магу працаваць",
+        "can_i_work_info":           "Праца: інфа",
+        "can_i_work_under15":        "Праца: да 15",
+        "can_i_work_15_17":          "Праца: 15–17",
+        "can_i_work_15_17_has_docs": "Праца: 15–17 з картай",
+        "can_i_work_18plus":         "Праца: 18+",
+        "can_i_work_18_has_docs":    "Праца: 18+ з картай",
+        "can_i_work_hours":          "Праца: гадзіны",
+        "can_i_work_contracts":      "Праца: дагаворы",
+        "can_i_work_game":           "Праца: гульня",
+        "documents":                 "Дакументы",
+        "docs_pesel":                "PESEL",
+        "earn_start":                "Хачу зарабіць",
+        "earn_info":                 "Заробак: інфа",
+        "earn_under15":              "Заробак: да 15",
+        "earn_15_17":                "Заробак: 15–17",
+        "earn_18plus":               "Заробак: 18+",
+        "earn_offline":              "Афлайн-праца",
+        "earn_online":               "Анлайн-заробак",
+        "earn_self":                 "Самазаробак",
+        "earn_game":                 "Заробак: гульня",
+        "career_skills":             "Навыкі / кар'ера",
+        "career_info":               "Кар'ера: інфа",
+        "career_internship":         "Стажыроўка",
+        "career_courses":            "Курсы",
+        "career_eu":                 "EU-праграмы",
+        "career_polish":             "Польская мова",
+        "career_game":               "Кар'ера: гульня",
+        "money_hub":                 "Мае грошы",
+        "open_account":              "Рахунак у банку",
+        "open_account_digital":      "Revolut / Wise",
+        "first_money":               "Першыя грошы",
+        "send_money":                "Грошы дадому",
+        "taxes_info":                "Падаткі: інфа",
+        "taxes_declaration":         "Падатковая дэкларацыя",
+        "just_arrived":              "Толькі прыехаў",
     }
     return names.get(key, key)
 
