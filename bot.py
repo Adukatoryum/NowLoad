@@ -320,6 +320,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if to_key in ("age_under15", "age_15_17", "age_18plus"):
         age_map = {"age_under15": "under_15", "age_15_17": "15_17", "age_18plus": "18_plus"}
         context.user_data["age"] = age_map[to_key]
+        welcome_key = COUNTRY_WELCOME.get(context.user_data.get("country", "poland"), "welcome")
+        log_click(user_id, context.user_data, welcome_key, get_section_name("welcome"))
         await send_message(update, "welcome", context)
         return
 
