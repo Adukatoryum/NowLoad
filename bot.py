@@ -62,6 +62,40 @@ COUNTRY_WELCOME = {
     "lithuania": "lt_welcome",
 }
 
+AGE_SELECT = {
+    "text": "Колькі табе гадоў?",
+    "buttons": [
+        [("👦 Менш за 15", "age_under15")],
+        [("🧑 15–17 гадоў", "age_15_17")],
+        [("🧒 18 і больш", "age_18plus")],
+        [("🆘 Патрэбна дапамога прама зараз", "emergency")],
+    ]
+}
+
+# Маршруты па ўзросту для раздзелаў якія раней пыталі ўзрост самастойна
+AGE_ROUTE = {
+    "earn_start": {
+        "under_15": "earn_under15",
+        "15_17":    "earn_15_17",
+        "18_plus":  "earn_18plus",
+    },
+    "can_i_work": {
+        "under_15": "can_work_under15",
+        "15_17":    "can_work_15_17",
+        "18_plus":  "can_work_18plus",
+    },
+    "career_skills": {
+        "under_15": "career_under15",
+        "15_17":    "career_15_17",
+        "18_plus":  "career_18_25",
+    },
+    "open_account": {
+        "under_15": "account_under18",
+        "15_17":    "account_under18",
+        "18_plus":  "account_18plus",
+    },
+}
+
 
 # ============================================================
 # УТЫЛІТЫ
@@ -95,6 +129,7 @@ def get_section_name(key: str) -> str:
     names = {
         "greeting":       "Прывітанне",
         "country_select": "Выбар краіны",
+        "age_select":     "Выбар узросту",
         "welcome":        "Галоўнае меню",
         "lt_welcome":     "Галоўнае меню (LT)",
         "emergency":      "SOS",
@@ -144,6 +179,11 @@ async def send_greeting(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def send_country_select(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["last_section"] = "country_select"
     await _send_raw(update, COUNTRY_SELECT["text"], build_keyboard(COUNTRY_SELECT["buttons"]))
+
+
+async def send_age_select(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["last_section"] = "age_select"
+    await _send_raw(update, AGE_SELECT["text"], build_keyboard(AGE_SELECT["buttons"]))
 
 
 async def send_message(update: Update, key: str, context: ContextTypes.DEFAULT_TYPE):
@@ -262,19 +302,32 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if to_key == "country_pl":
         context.user_data["country"] = "poland"
         context.user_data.pop("age", None)
-        await send_message(update, "welcome", context)
+        await send_age_select(update, context)
         return
 
     if to_key == "country_lt":
         context.user_data["country"] = "lithuania"
         context.user_data.pop("age", None)
-        await send_message(update, "welcome", context)
+        await send_age_select(update, context)
         return
 
     if to_key == "change_country":
         context.user_data.pop("country", None)
         context.user_data.pop("age", None)
         await send_country_select(update, context)
+        return
+
+    if to_key in ("age_under15", "age_15_17", "age_18plus"):
+        age_map = {"age_under15": "under_15", "age_15_17": "15_17", "age_18plus": "18_plus"}
+        context.user_data["age"] = age_map[to_key]
+        await send_message(update, "welcome", context)
+        return
+
+    # Калі ўзрост вядомы — абыходзім пытанне пра ўзрост у сцэнары
+    age = context.user_data.get("age")
+    if age and to_key in AGE_ROUTE:
+        routed_key = AGE_ROUTE[to_key][age]
+        await send_message(update, routed_key, context)
         return
 
     await send_message(update, to_key, context)
