@@ -1,5 +1,7 @@
 # NowLoad — Telegram-бот
 
+**GitHub:** https://github.com/Adukatoryum/NowLoad
+
 Навігатар па грошах, працы і правах для беларускіх падлеткаў і моладзі ў Польшчы.
 
 ---
