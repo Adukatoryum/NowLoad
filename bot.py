@@ -284,7 +284,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         section_name = get_section_name(last_section)
         await update.message.reply_text(
             f"З вяртаннем! \U0001f44b\n\n"
-            f"Ты быў(-ла) ў раздзеле «{section_name}».\n"
+            f"Ты быў:ла ў раздзеле «{section_name}».\n"
             f"Працягнуць?",
             reply_markup=build_keyboard([
                 [(f"\u25b6\ufe0f Так, працягнуць", last_section)],
