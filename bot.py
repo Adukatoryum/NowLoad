@@ -186,11 +186,11 @@ def get_section_name(key: str) -> str:
 async def _send_raw(update: Update, text: str, keyboard):
     if update.callback_query:
         await update.callback_query.message.reply_text(
-            text=text, reply_markup=keyboard, parse_mode=None
+            text=text, reply_markup=keyboard, parse_mode="HTML"
         )
     else:
         await update.message.reply_text(
-            text=text, reply_markup=keyboard, parse_mode=None
+            text=text, reply_markup=keyboard, parse_mode="HTML"
         )
 
 
