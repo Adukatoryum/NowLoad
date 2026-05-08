@@ -1,7 +1,7 @@
 """
 NowLoad — Telegram-бот для беларускіх падлеткаў і моладзі ў эміграцыі.
 Навігатар па грошах, працы і правах у краінах ЕС.
-Паток: /start → прывітанне → выбар краіны → меню краіны
+Паток: /start → THEME_SELECT → (тэма) → GREETING → country_select → age_select → welcome
 """
 
 import logging
@@ -32,16 +32,44 @@ logger = logging.getLogger(__name__)
 # УВАХОДНЫЯ ЭКРАНЫ (незалежныя ад краіны)
 # ============================================================
 
-GREETING = {
+THEME_SELECT = {
     "text": (
         "Прывітанне! Я NowLoad 👋\n\n"
+        "Дапамагу разабрацца з тым, што важна.\n\n"
+        "Пра што думаеш?"
+    ),
+    "buttons": [
+        [("💸 Хачу мець свае грошы",          "greeting")],
+        [("🏠 Хачу самастойна жыць",           "coming_soon")],
+        [("🤝 Хачу сяброў і адносіны",         "coming_soon")],
+        [("📚 Хачу вучыцца",                   "coming_soon")],
+        [("🌿 Хачу быць здаравей",             "coming_soon")],
+        [("🎨 Хачу знайсці сябе ў творчасці", "coming_soon")],
+        [("🆘 Патрэбна дапамога прама зараз",  "emergency")],
+    ]
+}
+
+GREETING = {
+    "text": (
+        "Добра!\n\n"
         "Дапамагу табе разабрацца з грашыма, працай і правамі.\n\n"
         "Паспрабуем?\n\n"
-        "<i>NowLoad. Усё на(ў)ладзіцца.</i>"
+        "<i>NowLoad. Усё наладзіцца.</i>"
     ),
     "buttons": [
         [("Паспрабуем!", "country_select")],
         [("🆘 Патрэбна дапамога прама зараз", "emergency")],
+    ]
+}
+
+COMING_SOON = {
+    "text": (
+        "⏳ Гэты раздел яшчэ рыхтуецца.\n\n"
+        "Заходзь крыху пазней — усё неўзабаве будзе тут.\n\n"
+        "<i>Усё наладзіцца.</i>"
+    ),
+    "buttons": [
+        [("← Назад", "theme_select")],
     ]
 }
 
@@ -114,6 +142,8 @@ def get_message(key: str, user_data: dict = None) -> dict | None:
 
 def get_section_name(key: str) -> str:
     names = {
+        "theme_select":              "Выбар тэмы",
+        "coming_soon":               "Хутка",
         "greeting":                  "Прывітанне",
         "country_select":            "Выбар краіны",
         "age_select":                "Выбар узросту",
@@ -190,6 +220,22 @@ async def _send_raw(update: Update, text: str, keyboard):
         )
 
 
+async def send_theme_select(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["last_section"] = "theme_select"
+    if update.callback_query:
+        await update.callback_query.message.reply_text(
+            THEME_SELECT["text"],
+            reply_markup=build_keyboard(THEME_SELECT["buttons"]),
+            parse_mode="HTML"
+        )
+    else:
+        await update.message.reply_text(
+            THEME_SELECT["text"],
+            reply_markup=build_keyboard(THEME_SELECT["buttons"]),
+            parse_mode="HTML"
+        )
+
+
 async def send_greeting(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["last_section"] = "greeting"
     if update.callback_query:
@@ -253,7 +299,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     country = context.user_data.get("country")
     last_section = context.user_data.get("last_section")
     welcome_key_prev = COUNTRY_WELCOME.get(country, "welcome") if country else None
-    if country and last_section and last_section not in ("greeting", "country_select", welcome_key_prev, None):
+    if country and last_section and last_section not in (
+        "greeting", "theme_select", "coming_soon", "country_select", welcome_key_prev, None
+    ):
         log_click(user_id, context.user_data, "dead_end", f"тупік: {get_section_name(last_section)}")
 
     # Поўны скід — /start заўсёды пачынае з пачатку
@@ -264,8 +312,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["time_on_prev_sec"] = ""
     context.user_data["is_first_after_welcome"] = False
 
-    await send_greeting(update, context)
-    log_click(user_id, context.user_data, "greeting", get_section_name("greeting"))
+    await send_theme_select(update, context)
+    log_click(user_id, context.user_data, "theme_select", get_section_name("theme_select"))
 
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -297,7 +345,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log_click(user_id, context.user_data, to_key, get_section_name(to_key))
 
     if to_key == "go_back":
-        if back_target == "greeting":
+        if back_target == "theme_select":
+            await send_theme_select(update, context)
+        elif back_target == "greeting":
             await send_greeting(update, context)
         elif back_target == "country_select":
             await send_country_select(update, context)
@@ -306,7 +356,24 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif back_target:
             await send_message(update, back_target, context)
         else:
-            await send_greeting(update, context)
+            await send_theme_select(update, context)
+        return
+
+    if to_key == "theme_select":
+        await send_theme_select(update, context)
+        return
+
+    if to_key == "greeting":
+        await send_greeting(update, context)
+        return
+
+    if to_key == "coming_soon":
+        await _send_raw(
+            update,
+            COMING_SOON["text"],
+            build_keyboard(COMING_SOON["buttons"])
+        )
+        context.user_data["last_section"] = "coming_soon"
         return
 
     if to_key == "country_select":
@@ -377,9 +444,9 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ============================================================
 
 TEST_COMMANDS = [
-    ("scam_check",    "/test_scam",      "\u26a0\ufe0f Скам-чэк [PL]",          "poland"),
+    ("scam_check",    "/test_scam",      "⚠️ Скам-чэк [PL]",          "poland"),
     ("not_paid",      "/test_notpaid",   "\U0001f621 Не заплацілі [PL]",         "poland"),
-    ("can_i_work",    "/test_canwork",   "\u2753 Ці магу працаваць [PL]",        "poland"),
+    ("can_i_work",    "/test_canwork",   "❓ Ці магу працаваць [PL]",        "poland"),
     ("earn_start",    "/test_earn",      "\U0001f4b8 Хачу зарабіць [PL]",        "poland"),
     ("open_account",  "/test_account",   "\U0001f3e6 Рахунак [PL]",              "poland"),
     ("send_money",    "/test_send",      "\U0001f4b1 Перавесці грошы [PL]",      "poland"),
@@ -408,7 +475,7 @@ async def test_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lines = ["<b>Тэставыя каманды NowLoad</b>\n"]
     for _, cmd, label, _ in TEST_COMMANDS:
         lines.append(f"{label} — <code>{cmd}</code>")
-    lines.append("\n/start — Поўны паток (прывітанне → краіна → меню)")
+    lines.append("\n/start — Поўны паток (выбар тэмы → прывітанне → краіна → меню)")
     await update.message.reply_text("\n".join(lines), parse_mode="HTML")
 
 
@@ -438,11 +505,10 @@ def main():
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
 
-    logger.info("NowLoad запушчаны \u2705")
+    logger.info("NowLoad запушчаны ✅")
 
     app.run_polling(drop_pending_updates=True)
 
 
 if __name__ == "__main__":
     main()
-
