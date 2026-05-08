@@ -323,10 +323,16 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log_click(user_id, context.user_data, to_key, get_section_name(to_key))
 
     if to_key == "go_back":
-        # greeting/country_select/age_select are not in MESSAGES — fall back to welcome
-        non_content = {"greeting", "country_select", "age_select"}
-        target = back_target if (back_target and back_target not in non_content) else "welcome"
-        await send_message(update, target, context)
+        if back_target == "greeting":
+            await send_greeting(update, context)
+        elif back_target == "country_select":
+            await send_country_select(update, context)
+        elif back_target == "age_select":
+            await send_age_select(update, context)
+        elif back_target:
+            await send_message(update, back_target, context)
+        else:
+            await send_greeting(update, context)
         return
 
     if to_key == "country_select":
