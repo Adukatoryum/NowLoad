@@ -54,7 +54,7 @@ GREETING = {
         "Добра!\n\n"
         "Дапамагу табе разабрацца з грашыма, працай і правамі.\n\n"
         "Паспрабуем?\n\n"
-        "<i>NowLoad. Усё наладзіцца.</i>"
+        "<i>NowLoad. Усё на(ў)ладзіцца.</i>"
     ),
     "buttons": [
         [("Паспрабуем!", "country_select")],
@@ -66,7 +66,7 @@ COMING_SOON = {
     "text": (
         "⏳ Гэты раздел яшчэ рыхтуецца.\n\n"
         "Заходзь крыху пазней — усё неўзабаве будзе тут.\n\n"
-        "<i>Усё наладзіцца.</i>"
+        "<i>NowLoad. Усё на(ў)ладзіцца.</i>"
     ),
     "buttons": [
         [("← Назад", "theme_select")],
@@ -432,7 +432,7 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         "Дзякуй! Твой водгук дапаможа нам зрабіць бот лепшым \U0001f64f\n\n"
-        "NowLoad. Усё на(ў)ладзіцца.",
+        "<i>NowLoad. Усё на(ў)ладзіцца.</i>",
         reply_markup=build_keyboard([
             [("\U0001f3e0 Галоўнае меню", "welcome")],
         ])
