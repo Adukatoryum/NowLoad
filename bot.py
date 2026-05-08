@@ -247,51 +247,25 @@ async def send_message(update: Update, key: str, context: ContextTypes.DEFAULT_T
 # ============================================================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Паток новага карыстальніка:
-      /start -> прывітанне -> [Далей] -> выбар краіны -> меню краіны
-
-    Паток карыстальніка які вяртаецца (краіна ўжо вядома):
-      /start -> прапанова працягнуць / вярнуцца ў меню
-    """
     user_id = update.effective_user.id
+
+    # Лагіруем тупік старой сесіі перад поўным скідам
     country = context.user_data.get("country")
     last_section = context.user_data.get("last_section")
-
-    # Лагіруем тупік старой сесіі перад скідам
     welcome_key_prev = COUNTRY_WELCOME.get(country, "welcome") if country else None
     if country and last_section and last_section not in ("greeting", "country_select", welcome_key_prev, None):
         log_click(user_id, context.user_data, "dead_end", f"тупік: {get_section_name(last_section)}")
 
-    # Новая сесія
+    # Поўны скід — /start заўсёды пачынае з пачатку
+    context.user_data.clear()
     context.user_data["session_id"] = str(uuid.uuid4())[:8]
     context.user_data["step"] = 0
     context.user_data["last_click_time"] = None
     context.user_data["time_on_prev_sec"] = ""
     context.user_data["is_first_after_welcome"] = False
 
-    if not country:
-        await send_greeting(update, context)
-        log_click(user_id, context.user_data, "greeting", get_section_name("greeting"))
-        return
-
-    welcome_key = COUNTRY_WELCOME.get(country, "welcome")
-    if last_section and last_section not in ("greeting", "country_select", welcome_key):
-        section_name = get_section_name(last_section)
-        await update.message.reply_text(
-            f"З вяртаннем! \U0001f44b\n\n"
-            f"Ты быў:ла ў раздзеле «{section_name}».\n"
-            f"Працягнуць?",
-            reply_markup=build_keyboard([
-                [(f"\u25b6\ufe0f Так, працягнуць", last_section)],
-                [("\U0001f3e0 Галоўнае меню", "welcome")],
-                [("\U0001f30d Змяніць краіну", "change_country")],
-            ])
-        )
-        log_click(user_id, context.user_data, "start_return", get_section_name(last_section))
-    else:
-        await send_message(update, "welcome", context)
-        log_click(user_id, context.user_data, welcome_key, get_section_name(welcome_key))
+    await send_greeting(update, context)
+    log_click(user_id, context.user_data, "greeting", get_section_name("greeting"))
 
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
