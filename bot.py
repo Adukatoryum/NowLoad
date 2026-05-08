@@ -301,6 +301,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     from_key = context.user_data.get("last_section", "unknown")
     to_key = query.data
+    back_target = context.user_data.get("prev_section", "welcome")
     context.user_data["prev_section"] = from_key
 
     # Час на папярэднім раздзеле
@@ -320,6 +321,13 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["is_first_after_welcome"] = (from_key == "welcome")
 
     log_click(user_id, context.user_data, to_key, get_section_name(to_key))
+
+    if to_key == "go_back":
+        # greeting/country_select/age_select are not in MESSAGES — fall back to welcome
+        non_content = {"greeting", "country_select", "age_select"}
+        target = back_target if (back_target and back_target not in non_content) else "welcome"
+        await send_message(update, target, context)
+        return
 
     if to_key == "country_select":
         await send_country_select(update, context)
