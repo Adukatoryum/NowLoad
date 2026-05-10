@@ -263,13 +263,31 @@ async def send_age_select(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await _send_raw(update, AGE_SELECT["text"], build_keyboard(AGE_SELECT["buttons"]))
 
 
+def _split_at_midpoint(text: str) -> tuple[str, str]:
+    """Разбівае тэкст прыкладна напалову па межах абзацаў."""
+    paragraphs = text.split("\n\n")
+    if len(paragraphs) <= 1:
+        lines = text.split("\n")
+        mid = len(lines) // 2
+        return "\n".join(lines[:mid]), "\n".join(lines[mid:])
+    total = len(text)
+    best_i, best_diff = 1, float("inf")
+    pos = 0
+    for i, para in enumerate(paragraphs[:-1]):
+        pos += len(para) + 2
+        diff = abs(pos - total / 2)
+        if diff < best_diff:
+            best_diff, best_i = diff, i + 1
+    return "\n\n".join(paragraphs[:best_i]), "\n\n".join(paragraphs[best_i:])
+
+
 async def send_message(update: Update, key: str, context: ContextTypes.DEFAULT_TYPE):
     msg = get_message(key, context.user_data)
     if not msg:
         logger.warning(f"Ключ не знойдзены: {key}")
         return
 
-    keyboard = build_keyboard(msg["buttons"]) if msg.get("buttons") else None
+    buttons = msg.get("buttons") or []
     text = msg["text"]
     context.user_data["last_section"] = key
 
@@ -290,6 +308,16 @@ async def send_message(update: Update, key: str, context: ContextTypes.DEFAULT_T
     if key in age_keys and "age" not in context.user_data:
         context.user_data["age"] = age_keys[key]
 
+    # Разбіццё доўгіх экранаў: >20 радкоў і >5 кнопак
+    line_count = len(text.split("\n"))
+    btn_count = sum(len(row) for row in buttons)
+    if line_count > 20 and btn_count > 5:
+        part1, part2 = _split_at_midpoint(text)
+        context.user_data["continuation"] = {"text": part2, "buttons": buttons}
+        await _send_raw(update, part1, build_keyboard([[("Далей ▶️", "continue_reading")]]))
+        return
+
+    keyboard = build_keyboard(buttons) if buttons else None
     await _send_raw(update, text, keyboard)
 
 
@@ -362,6 +390,13 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await send_message(update, back_target, context)
         else:
             await send_theme_select(update, context)
+        return
+
+    if to_key == "continue_reading":
+        cont = context.user_data.get("continuation")
+        if cont:
+            del context.user_data["continuation"]
+            await _send_raw(update, cont["text"], build_keyboard(cont["buttons"]))
         return
 
     if to_key == "theme_select":
