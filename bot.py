@@ -1,4 +1,4 @@
-"""
+﻿"""
 NowLoad — Telegram-бот для беларускіх падлеткаў і моладзі ў эміграцыі.
 Навігатар па грошах, працы і правах у краінах ЕС.
 Паток: /start → THEME_SELECT → (тэма) → GREETING → country_select → age_select → welcome
@@ -179,7 +179,7 @@ def get_section_name(key: str) -> str:
         "can_i_work_18_has_docs":    "Праца: 18+ з картай",
         "can_i_work_hours":          "Праца: гадзіны",
         "can_i_work_contracts":      "Праца: дагаворы",
-        "can_i_work_game":           "Праца: гульня",
+        "cw18plus_game":           "Праца: гульня",
         "documents":                 "Дакументы",
         "docs_pesel":                "PESEL",
         "earn_start":                "Хачу зарабіць",
