@@ -113,6 +113,11 @@ AGE_ROUTE = {
         "15_17":    "can_i_work_15_17",
         "18_plus":  "can_i_work_18plus",
     },
+    "can_i_work_game": {
+        "under_15": "cwu15_game",
+        "15_17":    "cw1517_game",
+        "18_plus":  "cw18plus_game",
+    },
     # career_skills і open_account у v2.0 не маюць узроставых падраздзелаў
 }
 
